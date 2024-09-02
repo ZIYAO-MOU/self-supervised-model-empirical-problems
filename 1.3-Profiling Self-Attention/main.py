@@ -77,7 +77,15 @@ def profile_self_attention(input_lengths, embed_size=512, heads=1, device='cuda'
                     _ = self_attention(values, keys, queries)
             
             flops = sum([event.cpu_time for event in prof.key_averages()])
-            memory = torch.cuda.max_memory_allocated(device)
+
+            if device == 'cuda':
+                memory = torch.cuda.max_memory_allocated(device)
+                torch.cuda.reset_max_memory_allocated(device)
+            else:
+                memory = values.element_size() * values.nelement() + \
+                        keys.element_size() * keys.nelement() + \
+                        queries.element_size() * queries.nelement()
+
             start_time = time.time()
             _ = self_attention(values, keys, queries)
             end_time = time.time()
@@ -87,7 +95,7 @@ def profile_self_attention(input_lengths, embed_size=512, heads=1, device='cuda'
             memory_trials.append(memory)
             time_trials.append(time_taken)
 
-            torch.cuda.reset_max_memory_allocated(device)
+            # torch.cuda.reset_max_memory_allocated(device)
         
         flops_mean = np.mean(flops_trials)
         memory_mean = np.mean(memory_trials)
@@ -107,7 +115,7 @@ def profile_self_attention(input_lengths, embed_size=512, heads=1, device='cuda'
 
     return flops_list, memory_list, time_list, flops_se_list, memory_se_list, time_se_list
 
-def plot_results(input_lengths, flops_list, memory_list, time_list, flops_se_list, memory_se_list, time_se_list):
+def plot_results(input_lengths, flops_list, memory_list, time_list, flops_se_list, memory_se_list, time_se_list, device):
     fig, axs = plt.subplots(3, 1, figsize=(10, 15))
 
     # Plot FLOPS with error bars
@@ -130,12 +138,13 @@ def plot_results(input_lengths, flops_list, memory_list, time_list, flops_se_lis
 
     plt.tight_layout()
     plt.show()
-    plt.savefig('main_plot_error.png', dpi=300)
+    plt.savefig('main_plot_error'+ device +'.png', dpi=300)
 
 # Set parameters
 input_lengths = [10, 100, 1000, 10000, 100000]
-flops_list, memory_list, time_list, flops_se_list, memory_se_list, time_se_list = profile_self_attention(input_lengths)
 
-# Plot results with error bars
-plot_results(input_lengths, flops_list, memory_list, time_list, flops_se_list, memory_se_list, time_se_list)
+for device in ['cuda', 'cpu']:
+    flops_list, memory_list, time_list, flops_se_list, memory_se_list, time_se_list = profile_self_attention(input_lengths, device=device)
+    # Plot results with error bars
+    plot_results(input_lengths, flops_list, memory_list, time_list, flops_se_list, memory_se_list, time_se_list, device)
 
