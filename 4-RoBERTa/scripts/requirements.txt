@@ -1,0 +1,7 @@
+torch
+datasets
+matplotlib
+transformers
+scikit-learn
+evaluate
+peft
