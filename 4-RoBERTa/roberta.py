@@ -53,7 +53,6 @@ trainer.train()
 
 results = trainer.evaluate(encoded_dataset["test"])
 
-print(f"Validation Accuracy: {results['eval_accuracy']}")
-print(f"Test Accuracy: {results['eval_accuracy']}")
+print(results)
 
 model.save_pretrained("best/roberta/")

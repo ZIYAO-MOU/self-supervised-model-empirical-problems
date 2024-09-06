@@ -77,8 +77,5 @@ trainer.train()
 results = trainer.evaluate(encoded_dataset["test"])
 print(results)
 
-print(f"Validation Accuracy: {results['eval_accuracy']}")
-print(f"Test Accuracy: {results['eval_accuracy']}")
-
 # Save the model
 model.save_pretrained("best/lora/")
