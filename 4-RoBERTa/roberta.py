@@ -23,14 +23,14 @@ def compute_metrics(eval_pred):
 
 # Split dataset into validation, and test
 test_size = 400
-eval_dataset = encoded_dataset["validation"].select(range(test_size))
-test_dataset = encoded_dataset["validation"].select(range(test_size, len(encoded_dataset["validation"])))
+encoded_dataset["test"] = encoded_dataset["validation"].select(range(test_size))
+encoded_dataset["validation"] = encoded_dataset["validation"].select(range(test_size, len(encoded_dataset["validation"])))
 
 training_args = TrainingArguments(
     per_device_train_batch_size=16,
     num_train_epochs=5,
     report_to="tensorboard",
-    logging_steps=100,
+    logging_steps=100, 
     save_steps=1000,
     save_total_limit=1,
     load_best_model_at_end=True,
@@ -51,8 +51,9 @@ trainer = Trainer(
 
 trainer.train()
 
-results = trainer.evaluate(encoded_dataset["test"])
+test_result = trainer.evaluate(encoded_dataset["test"])
+val_result =  trainer.evaluate(encoded_dataset["validation"])
 
-print(results)
+print(f'test_result:{test_result}, val_result: {val_result}')
 
 model.save_pretrained("best/roberta/")

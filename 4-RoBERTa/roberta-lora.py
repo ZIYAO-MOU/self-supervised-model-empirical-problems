@@ -40,7 +40,7 @@ def compute_metrics(eval_pred):
 
 # Define training arguments
 training_args = TrainingArguments(
-    per_device_train_batch_size=12,
+    per_device_train_batch_size=16,
     num_train_epochs=5,
     logging_dir="logs/lora/",
     report_to="tensorboard",
@@ -73,9 +73,10 @@ trainer = Trainer(
 # Train the model
 trainer.train()
 
-# Evaluate the model on the test set
-results = trainer.evaluate(encoded_dataset["test"])
-print(results)
+test_result = trainer.evaluate(encoded_dataset["test"])
+val_result =  trainer.evaluate(encoded_dataset["validation"])
+
+print(f'test_result:{test_result}, val_result: {val_result}')
 
 # Save the model
 model.save_pretrained("best/lora/")
